@@ -9,8 +9,25 @@ df = pd.read_csv('../data/videos_by_channel.csv')
 texts = []
 imagenes = []
 
+def text_from_image_in_df(df: pd.DataFrame):
+    for video in df:
+        image = download_image(video['thumbnailUrl'])
+        text = extract_text_from_image(image)
+        df['text'] = text
+
+def download_image(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        img = Image.open(BytesIO(response.content)).convert("RGB")
+        return img
+    except Exception as e:
+        print(f"Error al abrir {url}: {e}")
+        return None
+
 # Función para extraer texto de una imagen usando Vertex AI OCR
 def extract_text_from_image(image):
+    vision_client = vision.ImageAnnotatorClient()
     try:
         #buffer de memoria para almacenar datos binarios (de la imagen)
         buffered = BytesIO()
@@ -30,12 +47,3 @@ def extract_text_from_image(image):
     except Exception as e:
         print(f"Error al extraer texto: {e}")
         return None
-
-
-for url in df['thumbnailUrl']:
-    response = requests.get(url)
-    img = Image.open(BytesIO(response.content))
-    imagenes.append(img)
-
-    extracted_text = extract_text_from_image(img)
-    texts.append(extracted_text)
