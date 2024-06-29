@@ -10,10 +10,11 @@ texts = []
 imagenes = []
 
 def text_from_image_in_df(df: pd.DataFrame):
-    for video in df:
-        image = download_image(video['thumbnailUrl'])
+    for index, row in df.iterrows():
+        image = download_image(row['thumbnailUrl'])
         text = extract_text_from_image(image)
-        df['text'] = text
+        texts.append(text)
+    df['text'] = text
 
 def download_image(url):
     try:
