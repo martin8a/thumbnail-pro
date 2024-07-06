@@ -7,7 +7,7 @@ import os
 
 dir_root = os.path.dirname(os.path.dirname(__file__))
 dir_path = os.path.join(dir_root , 'data')
-df = pd.read_csv(dir_path + '/prefinal_data.csv')
+df = pd.read_csv(dir_path + '/data_completa.csv')
 texts = []
 imagenes = []
 
@@ -21,7 +21,7 @@ def text_from_image_in_df(df: pd.DataFrame):
     #df.iloc[:, 'text'] = text
     print('Sobreescribiendo archivo')
 
-    df.to_csv(dir_path + '/prefinal_data.csv')
+    df.to_csv(dir_path + '/data_image_text.csv')
     print('Archivo almacenado con exito')
 
 def download_image(url):
