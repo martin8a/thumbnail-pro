@@ -8,15 +8,16 @@ import os
 import json
 import base64
 import io
-from transformers import AutoTokenizer, pipeline
+import modelbit
+#from transformers import AutoTokenizer, pipeline
 # Load model directly
-from transformers import AutoModelForCausalLM
-from transformers import AutoProcessor, AutoModelForPreTraining
+#from transformers import AutoModelForCausalLM
+#from transformers import AutoProcessor, AutoModelForPreTraining
 ## #model = AutoModelForCausalLM.from_pretrained("Ridealist/llava-v1.6-mistral-7b-chess-finetuned")
 ## processor = AutoProcessor.from_pretrained("llava-hf/llava-v1.6-mistral-7b-hf")
 ## model = AutoModelForPreTraining.from_pretrained("llava-hf/llava-v1.6-mistral-7b-hf")
 
-import requests
+#import requests
 
 #def query(payload, title, keywords, thumbnail):
 #    API_URL = "https://api-inference.huggingface.co/models/llava-v1.6-mistral-7b-chess-finetuned"
@@ -112,9 +113,6 @@ def main():
 
         if title and thumbnail and keywords:
             # Display the inputs
-            st.write("### Submitted Data")
-            st.write(f"**Title:** {title}")
-            st.write(f"**Keywords:** {keywords.split(',')}")
 
             # Display the uploaded image
             st.image(thumbnail, caption='Uploaded Thumbnail', use_column_width=True)
@@ -124,28 +122,34 @@ def main():
 
     #Mandar los resultados de la foto, texto, titulo
     # Leer la imagen
-    image = Image.open(thumbnail)
+            image = Image.open(thumbnail)
 
-    # Convertir la imagen a bytes
-    buffered = io.BytesIO()
-    image.save(buffered, format="JPEG")
-    img_bytes = buffered.getvalue()
+            # Convertir la imagen a bytes
+            buffered = io.BytesIO()
+            image.save(buffered, format="JPEG")
+            img_bytes = buffered.getvalue()
 
-    # Codificar la imagen en base64 (opcional)
-    img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+            # Codificar la imagen en base64 (opcional)
+            img_base64 = base64.b64encode(img_bytes).decode('utf-8')
 
-        # Preparar los datos para la API
-    inputs = {
-        "title": title,
-        "keywords": keywords,
-        "image": img_base64
-    }
+                # Preparar los datos para la API
+            inputs = {
+                "title": title,
+                "keywords": keywords,
+                "image": img_base64
+            }
 
-    ##AQUI PONER EL MODELO!!!!!!!
-    #response = model_api(inputs = inputs)
-    response = requests.get(model_url, headers=headers, json=inputs, timeout=3600).json()
-    print('Modelo corriendo')
-    st.write(response)
+            ##AQUI PONER EL MODELO!!!!!!!
+            #response = model_api(inputs = inputs)
+            query3=f'<image>\nYou are a creative strategist for a technology YouTuber. Based on their target audience of tech evaluate this thumbnail. For context the title of the video is “Swingline Stack and Shred hands-free shredder”. For the evaluation provide the following. A score out of a 100 of how you think this image will perform as a YouTube thumbnail. A videoClicks/totalChannelSubscribers ratio estimate. Three reasons for the evaluation. And three recommendations to improve the thumbnail. Please format as a JSON.\n'
+
+            response = modelbit.get_inference(
+                workspace="martinochoa",
+                deployment="prompt_llava",
+                data=['https://i.ytimg.com/vi/-hd-vnEx22M/mqdefault.jpg', query3]
+            )
+            print('Modelo corriendo')
+            st.write(response)
 
     ### Barra de carga del progreso
     #'Starting a long computation...'
