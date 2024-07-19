@@ -9,15 +9,6 @@ import json
 import base64
 import io
 import modelbit
-#from transformers import AutoTokenizer, pipeline
-# Load model directly
-#from transformers import AutoModelForCausalLM
-#from transformers import AutoProcessor, AutoModelForPreTraining
-## #model = AutoModelForCausalLM.from_pretrained("Ridealist/llava-v1.6-mistral-7b-chess-finetuned")
-## processor = AutoProcessor.from_pretrained("llava-hf/llava-v1.6-mistral-7b-hf")
-## model = AutoModelForPreTraining.from_pretrained("llava-hf/llava-v1.6-mistral-7b-hf")
-
-#import requests
 
 #def query(payload, title, keywords, thumbnail):
 #    API_URL = "https://api-inference.huggingface.co/models/llava-v1.6-mistral-7b-chess-finetuned"
