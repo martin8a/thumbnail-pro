@@ -28,9 +28,19 @@ headers = {
 
 def main():
     # Caracteristicas basicas de la pagina
-    
+
     st.set_page_config(page_icon='', page_title = 'Thumbnail-Pro')
-    st.markdown('# Thumbnail-Pro')
+
+    title_container = st.container()
+    col1, col2 = st.columns([2, 16], vertical_alignment = 'top')
+    logo = Image.open('front/logo.png')
+    with title_container:
+        with col1:
+            st.image(logo, width=80)
+        with col2:
+            st.markdown('<h1 style="color: white;">Thumbnail-Pro</h1>',
+                        unsafe_allow_html=True)
+    #st.markdown('# Thumbnail-Pro')
     st.markdown('## Make your videos **stand out!**')
     st.image('https://i.ytimg.com/vi/BEAm5lUn70M/maxresdefault.jpg', width=600)
 
@@ -83,39 +93,33 @@ def main():
             st.error("Please enter keywords.")
 
         if title and thumbnail and keywords:
-            # Display the inputs
 
             # Display the uploaded image
             st.image(thumbnail, caption='Uploaded Thumbnail', use_column_width=True)
 
             # Here you would add the code to process the data and give feedback
-            st.success("Data submitted successfully! Analyzing the performance...")
+            success = st.success("Data submitted successfully! Analyzing the performance...")
 
             # Convertir la imagen a bytes
             img_base64 = image_to_base64(thumbnail)
             scoreData = get_thumbnail_pro_model(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
-            st.write(scoreData['classification'])
-            st.write(scoreData['score'])
-            
+
+            if scoreData:
+                success.empty()
+                #Metricas presentadas en formato amigable
+                st.metric(label="Score", value=scoreData['score']) #delta=
+                st.metric(label=scoreData['classification'], value='< 10%')
+
+            recomm = st.success("Getting recommendations!")
             recommendations = get_recommendations_llava(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
+            recomm.empty()
+
+
 
             print('Modelo corriendo')
             st.write(recommendations)
 
-    ### Barra de carga del progreso
-    #'Starting a long computation...'
-    ## Add a placeholder
-    #latest_iteration = st.empty()
-    #bar = st.progress(0)
-    #for i in range(100):
-    #    # Update the progress bar with each iteration.
-    #    latest_iteration.text(f'Iteration {i+1}')
-    #    bar.progress(i + 1)
-    #    time.sleep(0.1)
-    #'...and now we\'re done!'
-## Cuando se aplaste el boton enviar el input al modelo
-# (procesar imagen y subir a algun lado) y despues pasarle al modelo
-# Cuando se pase al modelo, el modelo me va a retornar un score que lo debo presentar en algun tipo de chart
+
 
 if __name__=='__main__':
     main()
