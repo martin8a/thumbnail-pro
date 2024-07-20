@@ -9,9 +9,11 @@ import json
 import base64
 import io
 import modelbit
+import requests
 from get_data_from_model import get_thumbnail_pro_model
 from process_image import image_to_base64
 from get_data_from_model import get_recommendations_llava
+
 
 os.environ['HUGGINGFACEHUB_API_TOKEN'] = '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'
 api_token = os.environ['HUGGINGFACEHUB_API_TOKEN']
@@ -78,7 +80,8 @@ def main():
         keywords = st.text_input("Enter the keywords (comma-separated):")
 
         # Image upload
-        thumbnail = st.file_uploader("Upload the thumbnail image (JPEG or PNG):", type=["jpg", "jpeg", "png"])
+        thumbnail = st.text_input("Upload the thumbnail image URL:") #type=["jpg", "jpeg", "png"])
+
 
         # Boton para imprimir resultados del modelo
         submit_button = st.form_submit_button(label='Submit')
@@ -88,40 +91,54 @@ def main():
         if not title:
             st.error("Please enter a video title.")
         if not thumbnail:
-            st.error("Please upload a thumbnail image.")
+            st.error("Please upload a thumbnail image URL.")
         if not keywords:
             st.error("Please enter keywords.")
 
         if title and thumbnail and keywords:
 
+            thumbnailImage = Image.open(requests.get(thumbnail, stream=True).raw)
             # Display the uploaded image
-            st.image(thumbnail, caption='Uploaded Thumbnail', use_column_width=True)
+            st.image(thumbnailImage, caption='Uploaded Thumbnail', use_column_width=True)
 
             # Convertir la imagen a bytes
-            img_base64 = image_to_base64(thumbnail)
+            #img_base64 = image_to_base64(thumbnail)
 
             # Here you would add the code to process the data and give feedback
             with st.spinner("Analyzing your thumbnail performance..."):
 
-                scoreData = get_thumbnail_pro_model(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
+                scoreData = get_thumbnail_pro_model(title, thumbnail)
 
-            if scoreData:
+            if scoreData and scoreData != 'Error':
                 with st.container(border = True):
                     #Metricas presentadas en formato amigable
                     st.markdown('### Thumbnail metrics:')
                     col1, col2, col3 = st.columns(3)
                     col1.metric(label="Score", value=scoreData['score']) #delta=
                     col2.metric(label='Performance', value = scoreData['classification'].split()[0].capitalize())
-                    col3.metric(label = '% Views por Subscribers', value = '< 10%')
 
-            with st.spinner("Creating your recommendations..."):
-                recommendations = get_recommendations_llava(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
+                    classif = scoreData['classification'].split()[0].capitalize()
+                    viewsRatio = '> 120%'
+                    if classif == 'Bad':
+                        viewsRatio = '< 5%'
+                    elif classif == 'Low':
+                        viewsRatio = "5 - 10%"
+                    elif classif == 'Medium':
+                        viewsRatio = '10 - 30%'
+                    elif classif == 'Great':
+                        viewsRatio = '30 - 60%'
+                    elif classif == 'High':
+                        viewsRatio = '60 - 120%'
+                    else:
+                        viewsRatio = '> 120%'
+                    col3.metric(label = '% Views por Subscribers', value = viewsRatio)
 
-            with st.container(border = True):
-                st.markdown('### Your recommendations:')
-                st.write(recommendations)
+                with st.spinner("Creating your recommendations..."):
+                    recommendations = get_recommendations_llava(title, thumbnail)
 
-
+                with st.container(border = True):
+                    st.markdown('### Your recommendations:')
+                    st.write(recommendations.split('Recommendations:')[0])
 
 if __name__=='__main__':
     main()
