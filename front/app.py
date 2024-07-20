@@ -9,40 +9,15 @@ import json
 import base64
 import io
 import modelbit
-#from transformers import AutoTokenizer, pipeline
-# Load model directly
-#from transformers import AutoModelForCausalLM
-#from transformers import AutoProcessor, AutoModelForPreTraining
-## #model = AutoModelForCausalLM.from_pretrained("Ridealist/llava-v1.6-mistral-7b-chess-finetuned")
-## processor = AutoProcessor.from_pretrained("llava-hf/llava-v1.6-mistral-7b-hf")
-## model = AutoModelForPreTraining.from_pretrained("llava-hf/llava-v1.6-mistral-7b-hf")
-
-#import requests
-
-#def query(payload, title, keywords, thumbnail):
-#    API_URL = "https://api-inference.huggingface.co/models/llava-v1.6-mistral-7b-chess-finetuned"
-#    headers = {"Authorization": f"Bearer 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"}
-#    response = requests.post(API_URL, headers=headers, json=payload)
-#    return response.json()
-# from archivo del modelo import *
-
-##Constants
-#saved_model_path =
-#
-## Load model (Cached)
-#@st.cache_resource
-#def load_model():
-#    return load(saved_model_path)
+from get_data_from_model import get_thumbnail_pro_model
+from process_image import image_to_base64
+from get_data_from_model import get_recommendations_llava
 
 os.environ['HUGGINGFACEHUB_API_TOKEN'] = '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'
 api_token = os.environ['HUGGINGFACEHUB_API_TOKEN']
 
 from huggingface_hub.inference_api import InferenceApi
 
-#model_api = InferenceApi(
-#    repo_id = "llava-hf/llava-v1.6-mistral-7b-hf",
-#    token = api_token
-#)
 
 # URL del modelo
 model_url = "https://api-inference.huggingface.co/models/llava-hf/llava-v1.6-mistral-7b-hf"
@@ -51,13 +26,9 @@ headers = {
     "Authorization": f"Bearer {api_token}"
 }
 
-#def results(title, keywords, thumbnail):
-    #thmb = model.load('llava')
-#    return model_api(inputs = [title, keywords, thumbnail])
-    #return query({"title": title, "keywords": keywords, "thumbnail": thumbnail})
-
 def main():
     # Caracteristicas basicas de la pagina
+    
     st.set_page_config(page_icon='', page_title = 'Thumbnail-Pro')
     st.markdown('# Thumbnail-Pro')
     st.markdown('## Make your videos **stand out!**')
@@ -120,36 +91,16 @@ def main():
             # Here you would add the code to process the data and give feedback
             st.success("Data submitted successfully! Analyzing the performance...")
 
-    #Mandar los resultados de la foto, texto, titulo
-    # Leer la imagen
-            image = Image.open(thumbnail)
-
             # Convertir la imagen a bytes
-            buffered = io.BytesIO()
-            image.save(buffered, format="JPEG")
-            img_bytes = buffered.getvalue()
+            img_base64 = image_to_base64(thumbnail)
+            scoreData = get_thumbnail_pro_model(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
+            st.write(scoreData['classification'])
+            st.write(scoreData['score'])
+            
+            recommendations = get_recommendations_llava(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
 
-            # Codificar la imagen en base64 (opcional)
-            img_base64 = base64.b64encode(img_bytes).decode('utf-8')
-
-                # Preparar los datos para la API
-            inputs = {
-                "title": title,
-                "keywords": keywords,
-                "image": img_base64
-            }
-
-            ##AQUI PONER EL MODELO!!!!!!!
-            #response = model_api(inputs = inputs)
-            query3=f'<image>\nYou are a creative strategist for a technology YouTuber. Based on their target audience of tech evaluate this thumbnail. For context the title of the video is “Swingline Stack and Shred hands-free shredder”. For the evaluation provide the following. A score out of a 100 of how you think this image will perform as a YouTube thumbnail. A videoClicks/totalChannelSubscribers ratio estimate. Three reasons for the evaluation. And three recommendations to improve the thumbnail. Please format as a JSON.\n'
-
-            response = modelbit.get_inference(
-                workspace="martinochoa",
-                deployment="prompt_llava",
-                data=['https://i.ytimg.com/vi/-hd-vnEx22M/mqdefault.jpg', query3]
-            )
             print('Modelo corriendo')
-            st.write(response)
+            st.write(recommendations)
 
     ### Barra de carga del progreso
     #'Starting a long computation...'
