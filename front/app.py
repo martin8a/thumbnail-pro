@@ -45,28 +45,28 @@ def main():
     st.image('https://i.ytimg.com/vi/BEAm5lUn70M/maxresdefault.jpg', width=600)
 
     ## Instrucciones
-    st.markdown('### - Instrucciones:')
+    st.markdown('### Instructions:')
 
     left_column, mid_column, right_column = st.columns(3, vertical_alignment = 'top')
     # You can use a column just like st.sidebar:
 
     with left_column:
-        with st.container(height= 285, border=True):
-            st.markdown('**1.** Seleccionar Thumbnail:\n')
-            st.markdown('- Escoge la imagen del thumbnail que quieres analizar.\n')
-            st.markdown('- Asegúrate de que la imagen esté en formato JPG, JPEG, o PNG.')
+        with st.container(height=285, border=True):
+            st.markdown('**1.** Select Thumbnail:\n')
+            st.markdown('- Choose the thumbnail image you want to analyze.\n')
+            st.markdown('- Make sure the image is in JPG, JPEG, or PNG format.')
 
     with mid_column:
-        with st.container(height= 285, border=True):
-            st.markdown('**2.** Escribir Título:\n')
-            st.markdown('- Escribe el título del video.\n')
-            st.markdown('- Asegúrate de que el título sea claro y atractivo.')
+        with st.container(height=285, border=True):
+            st.markdown('**2.** Write Title:\n')
+            st.markdown('- Write the video title.\n')
+            st.markdown('- Make sure the title is clear and engaging.')
 
     with right_column:
-        with st.container(height= 285, border=True):
-            st.markdown('**3.** Añadir Palabras Clave (Opcional):\n')
-            st.markdown('- Incluye palabras clave relevantes para tu video.\n')
-            st.markdown('- Estas palabras ayudarán a mejorar la precisión de las predicciones.')
+        with st.container(height=285, border=True):
+            st.markdown('**3.** Add Keywords:\n')
+            st.markdown('- Include relevant keywords for your video.\n')
+            st.markdown('- These keywords will help improve the accuracy of the predictions.')
 
 
     # Create a form
@@ -97,27 +97,29 @@ def main():
             # Display the uploaded image
             st.image(thumbnail, caption='Uploaded Thumbnail', use_column_width=True)
 
-            # Here you would add the code to process the data and give feedback
-            success = st.success("Data submitted successfully! Analyzing the performance...")
-
             # Convertir la imagen a bytes
             img_base64 = image_to_base64(thumbnail)
-            scoreData = get_thumbnail_pro_model(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
+
+            # Here you would add the code to process the data and give feedback
+            with st.spinner("Analyzing your thumbnail performance..."):
+
+                scoreData = get_thumbnail_pro_model(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
 
             if scoreData:
-                success.empty()
-                #Metricas presentadas en formato amigable
-                st.metric(label="Score", value=scoreData['score']) #delta=
-                st.metric(label=scoreData['classification'], value='< 10%')
+                with st.container(border = True):
+                    #Metricas presentadas en formato amigable
+                    st.markdown('### Thumbnail metrics:')
+                    col1, col2, col3 = st.columns(3)
+                    col1.metric(label="Score", value=scoreData['score']) #delta=
+                    col2.metric(label='Performance', value = scoreData['classification'].split()[0].capitalize())
+                    col3.metric(label = '% Views por Subscribers', value = '< 10%')
 
-            recomm = st.success("Getting recommendations!")
-            recommendations = get_recommendations_llava(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
-            recomm.empty()
+            with st.spinner("Creating your recommendations..."):
+                recommendations = get_recommendations_llava(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
 
-
-
-            print('Modelo corriendo')
-            st.write(recommendations)
+            with st.container(border = True):
+                st.markdown('### Your recommendations:')
+                st.write(recommendations)
 
 
 
