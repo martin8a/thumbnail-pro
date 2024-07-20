@@ -103,23 +103,22 @@ def main():
             # Convertir la imagen a bytes
             img_base64 = image_to_base64(thumbnail)
             scoreData = get_thumbnail_pro_model(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
-            st.write(scoreData['classification'])
-            st.write(scoreData['score'])
-
-            recommendations = get_recommendations_llava(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
-
 
             if scoreData:
                 success.empty()
-                st.markdown(f"Response: {scoreData}")
-                st.markdown(scoreData)
-                st.markdown(type(scoreData))
-
                 #Metricas presentadas en formato amigable
-                st.metric(label="Score", value=scoreData['data']['score']) #delta=
+                st.metric(label="Score", value=scoreData['score']) #delta=
+                st.metric(label=scoreData['classification'], value='< 10%')
+
+            recomm = st.success("Getting recommendations!")
+            recommendations = get_recommendations_llava(title, 'https://i.ytimg.com/vi/BEAm5lUn70M/mqdefault.jpg')
+            recomm.empty()
+
+
 
             print('Modelo corriendo')
             st.write(recommendations)
+
 
 
 if __name__=='__main__':
